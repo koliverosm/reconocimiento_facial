@@ -8,6 +8,12 @@ const write = content => {
     localStorage.setItem(itemName, JSON.stringify(content))
 }
 
+const grabarJWT = datosJWT => {
+
+
+    localStorage.setItem('datosJWT', JSON.stringify(datosJWT))
+}
+
 const update = (id, content) => {
     const tmp = [...read()];
     const index = tmp.findIndex(item => item.id === id)

@@ -1,7 +1,6 @@
 import 'babel-polyfill'
 import * as faceapi from 'face-api.js'
-import FaceDetector from './uploader.js'
-
+import { FaceDetector, getImg } from './uploader.js'
 
 const loadModels = async () => {
     await Promise.all([
@@ -12,9 +11,10 @@ const loadModels = async () => {
     ]);
 };
 
+
 const DetectarUsuario = async () => {
     await loadModels();
-
+    const detector = FaceDetector('.images-list');
     const videoContainer = document.querySelector('.js-video');
     const canvas = document.querySelector('.js-canvas');
     const context = canvas.getContext('2d');
@@ -26,7 +26,7 @@ const DetectarUsuario = async () => {
         requestAnimationFrame(reDraw);
     };
 
-    const match = FaceDetector('.images-list');
+    const match = detector.desface
     const processFace = async () => {
         const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
             .withFaceLandmarks()
@@ -65,8 +65,14 @@ AbrirCamara.onclick = async () => {
 
 //----Traer La Imagen De La base De Datos
 
-const consultar = document.querySelector('#consultar');
+const consultar = document.querySelector('#btnbuscarimg');
+consultar.addEventListener('click', async e => {
 
+    const selector_id_image = document.querySelector('#id_imagen');
+    // console.log(id_imagen);
+    getImg(selector_id_image)
+});
+//-------------------------------------------------
 const alertPlaceholder = document.getElementById('AlertMessageView')
 const appendAlert = (message, type) => {
     const wrapper = document.createElement('div')
