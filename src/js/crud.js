@@ -2,7 +2,7 @@ import { write ,read } from "./localStorage";
 import { v4 as uuidv4 } from 'uuid';
 import { FaceDetector } from "./uploader";
 
-
+window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
 const receivedFiles_bd = async (id_file) => {
     try {
@@ -193,6 +193,6 @@ const __send_file_Servidor = (file) => {
     })
 
 }
-window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-export {uploadFile,generated_jwt , verify_token , generated_id_face , load_data_user ,receivedFiles_bd}
+
+export { uploadFile ,generated_jwt , verify_token , generated_id_face , load_data_user ,receivedFiles_bd}
 

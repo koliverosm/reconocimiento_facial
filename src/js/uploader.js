@@ -1,4 +1,4 @@
-import { read, write, update, destroy } from './localStorage.js'
+import { read, write, grabarJWT, update, destroy } from './localStorage.js'
 import * as faceapi from 'face-api.js'
 import { v5 as uuidv5, v4 as uuidv4 } from 'uuid';
 import { ImageDTO } from '../dto/object_image.js';
@@ -9,7 +9,7 @@ const getImg = async (id_imagen_selector) => {
     const id = id_imagen_selector.value
     receivedFiles_bd(id)
 }
-
+const idimagedisabled = document.querySelector('#id_image')
 const FaceDetector = (imagesListSelector) => {
     const imagesList = document.querySelector(imagesListSelector);
     // imagesList.style.display = 'none';
@@ -87,10 +87,46 @@ const FaceDetector = (imagesListSelector) => {
         )))
     }
 
+    syncImages();
+    let contador = 0;
+    let rostroAnterior = null;
+    
+    const desface = descriptor => {
+        if (!faceMatcher || !descriptor) return;
+        const match = faceMatcher.findBestMatch(descriptor);
+    
+        [...imagesList.children].forEach(async image => {
+            if (match.label === image.id) {
+                if (match.label !== rostroAnterior) {
+                    contador = 1; // Reiniciar contador si es un rostro nuevo
+                    rostroAnterior = match.label;
+                } else {
+                    contador += 1;
+                }
+    
+                console.log('Contando La Cantidad De Math: ' + contador)
+                if (contador > 20) {
+                    const payload = await generated_jwt(`${match.label}`)
+                    grabarJWT(payload.token)
+                    console.log('token ' + payload.token)
+                    contador = 0;
+                    // Realizar otras acciones necesarias cuando se alcanza el contador deseado
+                }
+    
+                image.classList.add('selected');
+            } else {
+                image.classList.remove('selected');
+            }
+        });
+    
+        return match;
+    }
+    
+
 
     const subirinfo = document.querySelector('#subirinfo')
 
-  
+
     subirinfo.addEventListener('click', async captura => {
         captura.preventDefault()
 
@@ -106,7 +142,7 @@ const FaceDetector = (imagesListSelector) => {
         await load_data_user(image.files[0], dataUser) //const id_face_trans =
         //console.log(id_face_trans)
 
-        ///Luego Se Subir La Imagen Con El Id Generado Desde  Backend Lo Guardo Localmente EN TEMPORARY DEl NAVEGADOR
+        ///Luego Se Subir La Imagen Con El Id Generado Desde  Backend, Guardo El PATH Localmente EN TEMPORARY DEl NAVEGADOR
         write([
             ...read(),
             {
@@ -120,39 +156,6 @@ const FaceDetector = (imagesListSelector) => {
         syncImages()
     })
 
-
-    syncImages();
-    let contador = 0;
-
-    const desface = descriptor => {
-        if (!faceMatcher || !descriptor) return;
-        const match = faceMatcher.findBestMatch(descriptor);
-        // console.log('Que es Descriptor: ' + descriptor);
-        [...imagesList.children].forEach(async image => {
-
-            if (match.label === image.id) {
-                contador += 1;
-                //console.log(`compatible`,contador)
-                //  console.log(`Estoy Comparando Match.Label ${match.label} y imageid ${image.id}`)
-                if (contador > 5) {
-
-                    const payload = await generated_jwt(`${match.label}`)
-                    const validatetoken = await verify_token(payload.token)
-                    // console.log("Se Valido El  Token? ", validatetoken.data.username)
-                    // console.log('Otra Vista', validatetoken.message)
-                    contador = 0;
-                    // alert(`Hola!!  Bienvenido Maricon ${validatetoken.data.username} `)
-                    console.log(`Te Reconoci ${validatetoken.data.username}`)
-                }
-
-                image.classList.add('selected');
-                return
-            }
-            return image.classList.remove('selected')
-        })
-
-        return match
-    }
     return { desface, syncImages }
 }
 
@@ -161,8 +164,6 @@ const FaceDetector = (imagesListSelector) => {
 
 
 
-
-const idimagedisabled = document.querySelector('#id_image')
 
 
 const fileEntryPathToObjectUrl = async fileEntryPath => {

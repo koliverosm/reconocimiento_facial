@@ -1,4 +1,5 @@
 const itemName = 'imagenes'
+const item_name_token = 'token'
 const read = () => {
     const store = localStorage.getItem(itemName);
     return store ? JSON.parse(store) : []
@@ -11,7 +12,7 @@ const write = content => {
 const grabarJWT = datosJWT => {
 
 
-    localStorage.setItem('datosJWT', JSON.stringify(datosJWT))
+    localStorage.setItem(item_name_token, JSON.stringify(datosJWT))
 }
 
 const update = (id, content) => {
@@ -33,6 +34,7 @@ const destroy = id => {
 
 export {
     read,
+    grabarJWT,
     write,
     update,
     destroy
