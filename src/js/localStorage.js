@@ -1,5 +1,25 @@
 const itemName = 'imagenes'
 const item_name_token = 'token'
+
+// ----- Acciones Con JWT 
+
+const grabarJWT = datosJWT => {
+
+
+    localStorage.setItem(item_name_token, JSON.stringify(datosJWT))
+}
+
+const LeerJWT = () => {
+    const token = localStorage.getItem(item_name_token);
+    return token ? JSON.parse(token) : null;
+}
+
+//------------------------------------------------
+
+
+
+
+
 const read = () => {
     const store = localStorage.getItem(itemName);
     return store ? JSON.parse(store) : []
@@ -9,11 +29,7 @@ const write = content => {
     localStorage.setItem(itemName, JSON.stringify(content))
 }
 
-const grabarJWT = datosJWT => {
 
-
-    localStorage.setItem(item_name_token, JSON.stringify(datosJWT))
-}
 
 const update = (id, content) => {
     const tmp = [...read()];
@@ -35,6 +51,7 @@ const destroy = id => {
 export {
     read,
     grabarJWT,
+    LeerJWT,
     write,
     update,
     destroy

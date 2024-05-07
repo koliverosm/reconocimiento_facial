@@ -1,4 +1,4 @@
-import { write ,read } from "./localStorage";
+import { write, read } from "./localStorage";
 import { v4 as uuidv4 } from 'uuid';
 import { FaceDetector } from "./uploader";
 
@@ -79,9 +79,10 @@ const load_data_user = (file, dataUser) => {
             body: formData,
         }).then(response => {
 
-            return response.json(); 
-        }).then(payload => {resolve(payload);console.log('Todo Perfecto:', payload);
-        idimagedisabled.value = ''
+            return response.json();
+        }).then(payload => {
+            resolve(payload); console.log('Todo Perfecto:', payload);
+            idimagedisabled.value = ''
         }).catch(error => {
             console.error('Error al subir el archivo:', error);
         });
@@ -105,12 +106,7 @@ const generated_jwt = async id_face_match => {
             body: JSON.stringify({ 'id_face_identy': id_face_match })
         }).then(response => {
             //console.log('Esta Es la Repuesta Response: ', response)
-            const responses = response.json()
-            return responses;
-        }).then(payload => {
-            resolve(payload);
-            // console.log('Archivo subido con éxito:', payload['token']);
-
+            resolve({ json: response.json(), status: response.status });
         }).catch(error => {
             console.error('Error al subir el archivo:', error);
         });
@@ -131,13 +127,7 @@ const verify_token = async token => {
                 'Authorization': `Bearer ${token}`
             },
         }).then(response => {
-            // console.log('Esta Es la De Validar Token: ', response)
-            return response.json(); // Esto devuelve una promesa que resuelve con el objeto JSON.
-        }).then(payload => {
-            //const id_face = payload['generated']
-            resolve(payload);
-            // Ahora 'payload' es el objeto JSON resuelto.
-            console.log('data:', payload);
+            resolve({ json: response.json(), status: response.status });
         })
     })
 }
@@ -194,5 +184,5 @@ const __send_file_Servidor = (file) => {
 
 }
 
-export { uploadFile ,generated_jwt , verify_token , generated_id_face , load_data_user ,receivedFiles_bd}
+export { uploadFile, generated_jwt, verify_token, generated_id_face, load_data_user, receivedFiles_bd }
 

@@ -1,4 +1,5 @@
-import { read, write, grabarJWT, update, destroy } from './localStorage.js'
+import { read, write, grabarJWT, LeerJWT, update, destroy } from './localStorage.js'
+import { GrabarJWTsession as guardar, LeerJWTsession as leerSJwt } from './SessionStorage.js';
 import * as faceapi from 'face-api.js'
 import { v5 as uuidv5, v4 as uuidv4 } from 'uuid';
 import { ImageDTO } from '../dto/object_image.js';
@@ -37,7 +38,6 @@ const FaceDetector = (imagesListSelector) => {
             deleteLink.href = "#";
             deleteLink.innerText = "x";
             status.classList.add('status');
-
             status.innerText = 'Pendiente';
             imageElement.src = await fileEntryPathToObjectUrl(image.path);
             //console.log(image);
@@ -90,11 +90,11 @@ const FaceDetector = (imagesListSelector) => {
     syncImages();
     let contador = 0;
     let rostroAnterior = null;
-    
+    const esperar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     const desface = descriptor => {
         if (!faceMatcher || !descriptor) return;
         const match = faceMatcher.findBestMatch(descriptor);
-    
+
         [...imagesList.children].forEach(async image => {
             if (match.label === image.id) {
                 if (match.label !== rostroAnterior) {
@@ -102,26 +102,47 @@ const FaceDetector = (imagesListSelector) => {
                     rostroAnterior = match.label;
                 } else {
                     contador += 1;
+                    // console.log('Contando La Cantidad De Math: ' + contador)
                 }
-    
-                console.log('Contando La Cantidad De Math: ' + contador)
-                if (contador > 20) {
-                    const payload = await generated_jwt(`${match.label}`)
-                    grabarJWT(payload.token)
-                    console.log('token ' + payload.token)
-                    contador = 0;
-                    // Realizar otras acciones necesarias cuando se alcanza el contador deseado
+
+                if (contador == 10) {
+                    const carga = await generated_jwt(`${match.label}`);
+                    const payload = await carga.json;
+                    const status = carga.status;
+
+                    if (payload.success == true && status == 201) {
+                        await guardar(payload.token);
+                        console.log('token Grabado En SessionStorage: ' + payload.token)
+                        await esperar(10000);
+                        contador = 0;
+                        //const token = await LeerJWT();
+                        const token = await leerSJwt();
+                        if (token) {
+                            console.log('token Leido De SessionStorage: ' + token);
+                              // const validatetoken = await verify_token(token);
+
+                        // const dataUser = await validatetoken.json;
+                        // const statusCode = validatetoken.status;
+                        // console.log(dataUser.data.username);
+                        // console.log(`Te Reconoci ${validatetoken.data.username}`)
+
+
+                        } else { console.log('Error Al Leer Token En SessionStorage: ' + token); }
+
+                      
+                    } else { console.log('Existe Un Error'); }
+
                 }
-    
+
                 image.classList.add('selected');
             } else {
                 image.classList.remove('selected');
             }
         });
-    
+
         return match;
     }
-    
+
 
 
     const subirinfo = document.querySelector('#subirinfo')

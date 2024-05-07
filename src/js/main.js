@@ -11,23 +11,27 @@ const loadModels = async () => {
     ]);
 };
 
-
+const DenegarCamara = document.querySelector('#DenegarAccesoCamara')
+const CerrarModal = document.querySelector('#CerrarModal');
 const DetectarUsuario = async () => {
+    //--- Cargo Los Modelos De FaceAPi
     await loadModels();
+
+    // -- ñ. La Clase De FaceDetector -- (desface , syncImages)
     const detector = FaceDetector('.images-list');
+    // -- Identifico Los Elementos Del Modal Con Jquery
     const videoContainer = document.querySelector('.js-video');
     const canvas = document.querySelector('.js-canvas');
+
     const context = canvas.getContext('2d');
     const video = await navigator.mediaDevices.getUserMedia({ video: true });
     videoContainer.srcObject = video;
-
     const reDraw = async () => {
         context.drawImage(videoContainer, 0, 0, 640, 480);
         requestAnimationFrame(reDraw);
     };
-
     const match = detector.desface
-    const processFace = async () => {
+    const process_face_online = async () => {
         const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
             .withFaceLandmarks()
             .withFaceDescriptor();
@@ -37,21 +41,24 @@ const DetectarUsuario = async () => {
     };
 
     const fps = 2; // Detección cada 0.5 segundos
-    setInterval(processFace, 1000 / fps);
+    setInterval(process_face_online, 1000 / fps);
     requestAnimationFrame(reDraw);
+
+    // -- Acciones Para Cerrar La Transmicion De Video --
+    const stopVideoStream = () => {
+        if (video) {
+            video.getTracks().forEach(track => track.stop());
+        }
+    };
+
+    
+      DenegarCamara.addEventListener('click', stopVideoStream)
+      CerrarModal.addEventListener('click', stopVideoStream)
+   
 };
 
 
 
-const CerrarCamara = () => {
-
-
-}
-
-//-------Si El Usuario Denega El Acceso Nami
-const DenegarCamara = document.querySelector('#DenegarAccesoCamara')
-
-DenegarCamara.onclick = () => { console.log(DenegarCamara) }
 
 //-------------------------------------------------------------
 // -------  Permitir Que Nami Vea Al Usuario  Para Procesar La Solicitud ----
@@ -59,7 +66,8 @@ const AbrirCamara = document.querySelector('#AccesoCamara')
 AbrirCamara.onclick = async () => {
 
     await DetectarUsuario();
-    appendAlert('Excelente , Ahora ya tengo vista para reconocerte !', 'success')
+    abrirnotificacion()
+   // appendAlert('Excelente , Ahora ya tengo vista para reconocerte !', 'success')
 }
 //--------------------------------------------------
 
@@ -73,6 +81,14 @@ consultar.addEventListener('click', async e => {
     getImg(selector_id_image)
 });
 //-------------------------------------------------
+
+
+///--  Notificacion despues de que nami comienza a ver el usuario
+const toastLiveExample = document.getElementById('liveToast')
+const abrirnotificacion = () =>{
+        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+          toastBootstrap.show();    
+}
 const alertPlaceholder = document.getElementById('AlertMessageView')
 const appendAlert = (message, type) => {
     const wrapper = document.createElement('div')
@@ -83,7 +99,6 @@ const appendAlert = (message, type) => {
         '</div>'
     ].join('')
 
-    alertPlaceholder.append(wrapper)
-}
+    alertPlaceholder.append(wrapper)}
 
 
