@@ -1,69 +1,4 @@
-import { write, read } from "./localStorage";
 import { v4 as uuidv4 } from "uuid";
-import { FaceDetector } from "./uploader";
-
-window.requestFileSystem =
-  window.requestFileSystem || window.webkitRequestFileSystem;
-
-const receivedFiles_bd = async (id_file) => {
-  try {
-    const response = await fetch("http://127.0.0.1:5000/uploads/getfoto", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id: id_file }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    // Asumiendo que 'data' incluye { nombre: 'nombreDelArchivo', archivo: 'foto_base64' }
-    console.log("Archivo Recibido:", data);
-    // Ejemplo de cómo podrías usar la imagen Base64 para mostrarla en un <img>
-    const img = document.createElement("img");
-    img.src = `data:image/png;base64,${data.file}`; // Asegúrate de usar el tipo MIME correcto
-    document.body.appendChild(img);
-    // Convierte base64 a Blob
-    const base64toBlob = (base64Data, contentType) => {
-      const sliceSize = 512;
-      const byteCharacters = atob(base64Data);
-      const byteArrays = [];
-      for (
-        let offset = 0;
-        offset < byteCharacters.length;
-        offset += sliceSize
-      ) {
-        const slice = byteCharacters.slice(offset, offset + sliceSize);
-        const byteNumbers = new Array(slice.length);
-        for (let i = 0; i < slice.length; i++) {
-          byteNumbers[i] = slice.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
-      }
-      const blob = new Blob(byteArrays, { type: contentType });
-      return blob;
-    };
-    const contentType = "image/png"; // Asegúrate de usar el tipo MIME correcto para tu imagen
-    const blob = base64toBlob(data.file, contentType);
-    const fileEntry = await uploadFile(blob);
-    write([
-      ...read(),
-      {
-        id: `${data.id_face}`,
-        path: fileEntry.fullPath,
-        name: uuidv4().toString(), //(fileEntry.name)
-      },
-    ]);
-    console.log(localStorage.getItem("imagenes"));
-    const detector = FaceDetector(".images-list");
-    detector.syncImages;
-  } catch (error) {
-    console.error("Error al recibir el archivo:", error);
-  }
-};
 
 const load_images_faces = () => {
   return new Promise((resolve, reject) => {
@@ -87,7 +22,6 @@ const read_images_faces = (param1, param2) => {
   });
 };
 
-/////////////POST
 const load_data_user = (file, dataUser) => {
   return new Promise((resolve, _reject) => {
     const filename = `${file.name}`;
@@ -162,26 +96,8 @@ const generated_id_face = async () => {
   return data["generated"];
 };
 
-const uploadFile = (file) => {
-  return new Promise((resolve, _reject) => {
-    window.requestFileSystem(window.TEMPORARY, 1024 * 1024, function (fs) {
-      fs.root.getFile(
-        `${file.name}${uuidv4()}`,
-        { create: true, exclusive: true },
-        function (fileEntry) {
-          fileEntry.createWriter(
-            function (fileWriter) {
-              fileWriter.write(file);
-              resolve(fileEntry);
-            },
-            (e) => console.log(e)
-          );
-        },
-        (e) => console.log(e)
-      );
-    });
-  });
-};
+
+
 const __send_file_Servidor = (file) => {
   return new Promise((resolve, _reject) => {
     const filename = `${file.name}`;
@@ -211,10 +127,8 @@ const __send_file_Servidor = (file) => {
 export {
   read_images_faces,
   load_images_faces,
-  uploadFile,
   generated_jwt,
   verify_token,
   generated_id_face,
   load_data_user,
-  receivedFiles_bd,
 };

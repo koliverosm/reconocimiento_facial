@@ -1,7 +1,6 @@
 import 'babel-polyfill'
 import * as faceapi from 'face-api.js'
-import { FaceDetector, getImg } from './uploader.js'
-import {load_images_faces} from './crud.js'
+import { FaceDetector } from './uploader.js'
 const loadModels = async () => {
     await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
@@ -14,23 +13,19 @@ const loadModels = async () => {
 const DenegarCamara = document.querySelector('#DenegarAccesoCamara')
 const CerrarModal = document.querySelector('#CerrarModal');
 const DetectarUsuario = async () => {
-    //--- Cargo Los Modelos De FaceAPi
     await loadModels();
-  // LLenar img list
-    // -- Identifico Los Elementos Del Modal Con Jquery
     const videoContainer = document.querySelector('.js-video');
     const canvas = document.querySelector('.js-canvas');
-
     const context = canvas.getContext('2d');
     const video = await navigator.mediaDevices.getUserMedia({ video: true });
     videoContainer.srcObject = video;
-
     const detector = FaceDetector('.images-list');
     const reDraw = async () => {
         context.drawImage(videoContainer, 0, 0, 640, 480);
         requestAnimationFrame(reDraw);
     };
     const match = detector.desface
+    
     // Compara las imagenes en linea
     const process_face_online = async () => {
         const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
@@ -52,10 +47,10 @@ const DetectarUsuario = async () => {
         }
     };
 
-    
-      DenegarCamara.addEventListener('click', stopVideoStream)
-      CerrarModal.addEventListener('click', stopVideoStream)
-   
+
+    DenegarCamara.addEventListener('click', stopVideoStream)
+    CerrarModal.addEventListener('click', stopVideoStream)
+
 };
 
 
@@ -68,27 +63,16 @@ AbrirCamara.onclick = async () => {
 
     await DetectarUsuario();
     abrirnotificacion()
-   // appendAlert('Excelente , Ahora ya tengo vista para reconocerte !', 'success')
+    // appendAlert('Excelente , Ahora ya tengo vista para reconocerte !', 'success')
 }
 //--------------------------------------------------
-
-//----Traer La Imagen De La base De Datos
-
-const btnconsulta = document.querySelector('#btnbuscarimg');
-btnconsulta.addEventListener('click', async e => {
-
-    const selector_id_image = document.querySelector('#id_imagen');
-    // console.log(id_imagen);
-    getImg(selector_id_image)
-});
-//-------------------------------------------------
 
 
 ///--  Notificacion despues de que nami comienza a ver el usuario
 const toastLiveExample = document.getElementById('liveToast')
-const abrirnotificacion = () =>{
-        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
-          toastBootstrap.show();    
+const abrirnotificacion = () => {
+    const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+    toastBootstrap.show();
 }
 const alertPlaceholder = document.getElementById('AlertMessageView')
 const appendAlert = (message, type) => {
@@ -100,6 +84,7 @@ const appendAlert = (message, type) => {
         '</div>'
     ].join('')
 
-    alertPlaceholder.append(wrapper)}
+    alertPlaceholder.append(wrapper)
+}
 
 

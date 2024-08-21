@@ -1,16 +1,10 @@
-import { read, write, grabarJWT, LeerJWT, update, destroy } from './localStorage.js'
+import { read, write } from './localStorage.js'
 import { GrabarJWTsession as guardar, LeerJWTsession as leerSJwt } from './SessionStorage.js';
 import * as faceapi from 'face-api.js'
 import { v5 as uuidv5, v4 as uuidv4 } from 'uuid';
-import { ImageDTO } from '../dto/object_image.js';
 import { load_images_faces, generated_jwt, load_data_user, verify_token, generated_id_face, receivedFiles_bd } from './crud'
-window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
-const getImg = async (id_imagen_selector) => {
-    const id = id_imagen_selector.value
-    receivedFiles_bd(id)
-}
-const idimagedisabled = document.querySelector('#id_image')
+
 
 const FaceDetector = (imagesListSelector) => {
     const imagesList = document.querySelector(imagesListSelector);
@@ -182,19 +176,4 @@ const FaceDetector = (imagesListSelector) => {
     return { desface, syncImages }
 }
 
-
-
-/*
-
-const fileEntryPathToObjectUrl = async fileEntryPath => {
-    return URL.createObjectURL(await new Promise((resolve, reject) => {
-        window.requestFileSystem(window.TEMPORARY, 1024 * 1024, function (fs) {
-            fs.root.getFile(fileEntryPath, { create: true, exclusive: false }, function (fileEntry) {
-                fileEntry.file(resolve, reject)
-            }, e => console.log(e));
-        })
-    }))
-}
-        */
-
-export { FaceDetector, getImg };
+export { FaceDetector };
