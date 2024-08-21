@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import * as faceapi from 'face-api.js'
 import { FaceDetector, getImg } from './uploader.js'
-
+import {load_images_faces} from './crud.js'
 const loadModels = async () => {
     await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
@@ -16,9 +16,7 @@ const CerrarModal = document.querySelector('#CerrarModal');
 const DetectarUsuario = async () => {
     //--- Cargo Los Modelos De FaceAPi
     await loadModels();
-
-    // -- ñ. La Clase De FaceDetector -- (desface , syncImages)
-    const detector = FaceDetector('.images-list');
+  // LLenar img list
     // -- Identifico Los Elementos Del Modal Con Jquery
     const videoContainer = document.querySelector('.js-video');
     const canvas = document.querySelector('.js-canvas');
@@ -26,11 +24,14 @@ const DetectarUsuario = async () => {
     const context = canvas.getContext('2d');
     const video = await navigator.mediaDevices.getUserMedia({ video: true });
     videoContainer.srcObject = video;
+
+    const detector = FaceDetector('.images-list');
     const reDraw = async () => {
         context.drawImage(videoContainer, 0, 0, 640, 480);
         requestAnimationFrame(reDraw);
     };
     const match = detector.desface
+    // Compara las imagenes en linea
     const process_face_online = async () => {
         const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
             .withFaceLandmarks()
@@ -73,8 +74,8 @@ AbrirCamara.onclick = async () => {
 
 //----Traer La Imagen De La base De Datos
 
-const consultar = document.querySelector('#btnbuscarimg');
-consultar.addEventListener('click', async e => {
+const btnconsulta = document.querySelector('#btnbuscarimg');
+btnconsulta.addEventListener('click', async e => {
 
     const selector_id_image = document.querySelector('#id_imagen');
     // console.log(id_imagen);
